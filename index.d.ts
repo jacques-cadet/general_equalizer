@@ -31,6 +31,8 @@ export interface EqState {
   mode: EqMode;
   range: EqRange;
   bypass: boolean;
+  /** Limiter on: boosted peaks are held under 0 dBFS instead of clipping. */
+  limiter: boolean;
   bands: readonly EqBand[];
   /** gain as heard (clamped to the range), by band id, for every mode */
   gains: Readonly<Record<string, number>>;
@@ -57,6 +59,8 @@ export interface EqualizerOptions {
   storageKey?: string;
   defaultMode?: EqMode;
   defaultRange?: EqRange;
+  /** Limiter on when nothing is saved yet. Default false. */
+  defaultLimiter?: boolean;
   /** Built-in presets (default: BUILT_IN_PRESETS). */
   presets?: readonly EqPreset[];
   /** default 30 */
@@ -84,6 +88,8 @@ export interface EqualizerInstance {
   getValues(): number[];
   setRange(range: EqRange): void;
   setBypass(on: boolean): void;
+  /** Limiter on / off (works with bypass too). Saved. */
+  setLimiter(on: boolean): void;
   setCut(which: "low" | "high", hz: number): void;
   /** Flat bands (current mode) and both cuts off. */
   reset(): void;
@@ -104,6 +110,7 @@ export const MODES: Readonly<Record<EqMode, readonly EqBand[]>>;
 export const MODE_LIST: EqMode[];
 export const RANGES: EqRange[];
 export const MAX_RANGE: 18;
+export const LIMITER: { threshold: number; knee: number; ratio: number; attack: number; release: number };
 export const STEP: 0.1;
 export const LOW_CUT: { min: number; max: number; off: number };
 export const HIGH_CUT: { min: number; max: number; off: number };
@@ -119,6 +126,8 @@ export interface EqualizerProps extends Omit<ComponentPropsWithoutRef<"div">, "t
   showCuts?: boolean;
   /** 3 / 7 / 11-band switch */
   showModes?: boolean;
+  /** Limiter on/off button. Default true. */
+  showLimiter?: boolean;
   /** Shows a Done button that calls this. */
   onDone?: () => void;
 }
@@ -129,6 +138,10 @@ export interface EqualizerModalProps extends Omit<EqualizerProps, "onDone"> {
   open?: boolean;
   /** Escape, a backdrop click and Done call this. */
   onClose?: () => void;
+  /** Extra classes on the full-screen backdrop (e.g. Tailwind / Bootstrap utilities). */
+  overlayClassName?: string;
+  /** Extra classes on the dialog box. */
+  dialogClassName?: string;
 }
 export function EqualizerModal(props: EqualizerModalProps): ReactElement | null;
 

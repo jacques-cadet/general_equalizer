@@ -4,7 +4,7 @@ import { BUILT_IN_PRESETS, HIGH_CUT, LOW_CUT, MODES, createEqualizer } from "../
 // ---- a small fake Web Audio API: nodes remember what they're connected to ----
 class Param { constructor(v = 0) { this.value = v; } setTargetAtTime(v) { this.value = v; } }
 class Node {
-  constructor(ctx, kind) { this.ctx = ctx; this.kind = kind; this.out = new Set(); }
+  constructor(ctx, kind) { this.ctx = ctx; this.kind = kind; this.out = new Set(); this.gain = new Param(1); }
   connect(n) { this.out.add(n); return n; }
   disconnect(n) { if (n === undefined) this.out.clear(); else this.out.delete(n); }
 }
@@ -15,6 +15,7 @@ class FakeContext {
   constructor() { this.state = "suspended"; this.currentTime = 0; this.destination = new Node(this, "destination"); this.created = 0; }
   createGain() { return new Node(this, "gain"); }
   createBiquadFilter() { return new Biquad(this); }
+  createDynamicsCompressor() { const n = new Node(this, "limiter"); for (const k of ["threshold", "knee", "ratio", "attack", "release"]) n[k] = new Param(); return n; }
   createMediaElementSource(el) {
     if (el.__ctx) throw new Error("InvalidStateError: element already has a source");
     el.__ctx = this; this.created++;
@@ -326,5 +327,38 @@ describe("subscribe / getState", () => {
     eq.setRange(6);
     expect(good).toHaveBeenCalled();
     err.mockRestore();
+  });
+});
+
+
+describe("limiter", () => {
+  it("is off by default, and when on sits at the end of the chain and after bypass", () => {
+    const ctx = new FakeContext();
+    const st = memStorage();
+    const eq = createEqualizer({ audioContext: ctx, storage: st });
+    eq.attach(fakeEl());
+    expect(eq.getState().limiter).toBe(false);
+    expect(chain(eq).at(-1)).toBe("destination");
+    eq.setLimiter(true);
+    expect(eq.getState().limiter).toBe(true);
+    expect(chain(eq).slice(-3)).toEqual(["limiter", "gain", "destination"]);
+    const lim = nodes(eq).at(-3);
+    expect(lim.threshold.value).toBe(-2);
+    expect(nodes(eq).at(-2).gain.value).toBeCloseTo(10 ** (-1.14 / 20), 3);   // make-up gain taken back out
+    expect(lim.ratio.value).toBe(20);
+    eq.setBypass(true);
+    expect(chain(eq)).toEqual(["limiter", "gain", "destination"]);
+    eq.setBypass(false);
+    eq.setMode(7);                                     // rebuilding the bands keeps the limiter
+    expect(chain(eq).slice(-3)).toEqual(["limiter", "gain", "destination"]);
+    eq.setLimiter(false);
+    expect(chain(eq).at(-1)).toBe("destination");
+    expect(chain(eq)).not.toContain("limiter");
+    eq.setLimiter(true);
+    const again = createEqualizer({ audioContext: new FakeContext(), storage: st });
+    expect(again.getState().limiter).toBe(true);       // saved
+  });
+  it("defaultLimiter turns it on when nothing is saved", () => {
+    expect(createEqualizer({ storage: null, defaultLimiter: true }).getState().limiter).toBe(true);
   });
 });

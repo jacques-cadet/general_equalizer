@@ -1,6 +1,6 @@
 {
   "name": "general_equalizer",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A 3 / 7 / 11-band graphic equalizer for React on the Web Audio API: faders, low/high cut knobs, bypass, presets, themeable.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -41,13 +41,15 @@
     "vitest": "5.0.5"
   },
   "keywords": [
-    "react",
-    "equalizer",
-    "eq",
-    "web-audio",
     "audio",
     "biquad",
-    "music-player"
+    "bootstrap",
+    "eq",
+    "equalizer",
+    "music-player",
+    "react",
+    "tailwind",
+    "web-audio"
   ],
   "license": "MIT",
   "repository": {

@@ -41,7 +41,7 @@ const fill = (db, range) => {
 
 const defaultHelp = (bands, range) =>
   `${bands[0].label} Hz – ${bands[bands.length - 1].label.replace("k", " k")}Hz · ±${range} dB in 0.1 dB steps · ` +
-  "type a value (e.g. 1.3) or use ↑/↓ · double-click a band or knob to reset it";
+  "type a value (e.g. 1.3) or use ↑/↓ · double-click a band or knob to reset it · Limiter stops boosts from distorting";
 
 const Btn = ({ on, className = "", ...rest }) => (
   <button type="button" className={`geq-btn${on ? " is-on" : ""} ${className}`.trim()} {...rest} />
@@ -56,13 +56,15 @@ const Btn = ({ on, className = "", ...rest }) => (
  * @param {boolean} [props.showPresets=true]
  * @param {boolean} [props.showCuts=true]
  * @param {boolean} [props.showModes=true]     3 / 7 / 11-band switch
+ * @param {boolean} [props.showLimiter=true]   Limiter on/off button
  * @param {() => void} [props.onDone]          shows a Done button that calls this
  * @param {string} [props.className]
  */
 export default function Equalizer({ eq, title = "Equalizer", helpText, showPresets = true, showCuts = true, showModes = true,
+  showLimiter = true,
   onDone, className = "", ...rest }) {
   const st = useEqualizer(eq);
-  const { mode, range, bypass, bands, gains, cuts } = st;
+  const { mode, range, bypass, limiter, bands, gains, cuts } = st;
   const [help, setHelp] = useState(false);
   const [picked, setPicked] = useState("");
   const [name, setName] = useState("");
@@ -150,8 +152,14 @@ export default function Equalizer({ eq, title = "Equalizer", helpText, showPrese
       </div>
 
       <div className="geq-footer">
-        <Btn on={bypass} className="geq-bypass" aria-pressed={bypass} onClick={() => eq.setBypass(!bypass)}
-          title="Take the EQ out of the sound (settings are kept)">{bypass ? "Bypassed" : "Bypass"}</Btn>
+        <div className="geq-footer-start">
+          <Btn on={bypass} className="geq-bypass" aria-pressed={bypass} onClick={() => eq.setBypass(!bypass)}
+            title="Take the EQ out of the sound (settings are kept)">{bypass ? "Bypassed" : "Bypass"}</Btn>
+          {showLimiter && (
+            <Btn on={limiter} className="geq-limiter" aria-pressed={limiter} onClick={() => eq.setLimiter(!limiter)}
+              title="Stop boosted peaks from distorting (clipping)">Limiter</Btn>
+          )}
+        </div>
         <div className="geq-group geq-range" role="group" aria-label="Fader range">
           {RANGES.map((r) => (
             <Btn key={r} on={range === r} aria-pressed={range === r} onClick={() => eq.setRange(r)}>±{r} dB</Btn>

@@ -1,6 +1,6 @@
 import "./equalizer.css";
 export {
-  createEqualizer, MODES, MODE_LIST, RANGES, MAX_RANGE, STEP, LOW_CUT, HIGH_CUT, BUILT_IN_PRESETS,
+  createEqualizer, MODES, MODE_LIST, RANGES, MAX_RANGE, STEP, LOW_CUT, HIGH_CUT, LIMITER, BUILT_IN_PRESETS,
 } from "./engine.js";
 export { default as Equalizer } from "./react/Equalizer.jsx";
 export { default as EqualizerModal } from "./react/EqualizerModal.jsx";

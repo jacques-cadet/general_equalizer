@@ -31,8 +31,8 @@ function Demo() {
         <button type="button" onClick={() => setOpen(true)}>Open as dialog</button>
         <label>Theme{" "}
           <select value={theme} onChange={(e) => setTheme(e.target.value)}>
-            <option value="default">Default</option>
-            <option value="light">Light</option>
+            <option value="default">Default (light grey)</option>
+            <option value="dark">Dark</option>
           </select>
         </label>
       </div>
@@ -45,15 +45,15 @@ function Demo() {
 }
 
 const css = `
-  body { margin: 0; background: #0d0f13; color: #e8eaee; font-family: system-ui, sans-serif; }
+  body { margin: 0; background: #ffffff; color: #1f2937; font-family: system-ui, sans-serif; }
   .demo { max-width: 920px; margin: 0 auto; padding: 24px 16px; }
   .demo-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 12px 0; }
   .demo-row audio { max-width: 100%; }
-  .demo-panel { margin-top: 20px; padding: 20px; border-radius: 6px; background: var(--geq-bg, #14161b); }
-  [data-theme="light"] { --geq-bg: #ffffff; --geq-text: #1d2330; --geq-muted: #5c6577; --geq-accent: #1c64f2; --geq-accent-text: #fff;
-    --geq-thumb: #1d2330; --geq-thumb-active: #1c64f2; --geq-track: rgba(0,0,0,.18); --geq-surface: rgba(0,0,0,.06);
-    --geq-surface-hover: rgba(0,0,0,.12); --geq-glow: rgba(28,100,242,.45); }
-  [data-theme="light"] .demo-panel { color: #1d2330; }
+  .demo-panel { margin-top: 20px; padding: 20px; border-radius: 6px; background: var(--geq-bg, #f3f4f6); }
+  [data-theme="dark"] body { background: #111418; color: #e5e7eb; }
+  [data-theme="dark"] { --geq-bg: #1f2329; --geq-text: #e5e7eb; --geq-muted: #9ca3af; --geq-accent: #d1d5db; --geq-accent-text: #111827;
+    --geq-thumb: #e5e7eb; --geq-thumb-active: #ffffff; --geq-track: #4b5563; --geq-surface: #2d333b; --geq-surface-hover: #3a414b;
+    --geq-glow: rgba(255, 255, 255, .25); --geq-overlay-bg: rgba(0, 0, 0, .6); }
 `;
 document.head.appendChild(Object.assign(document.createElement("style"), { textContent: css }));
 createRoot(document.getElementById("root")).render(<StrictMode><Demo /></StrictMode>);

@@ -1,8 +1,9 @@
 // general_equalizer engine: a switchable 3 / 7 / 11-band graphic EQ with low / high cut, bypass and presets,
 // on the Web Audio API. No React in here; the React components only read and drive an instance of this.
 //
-//   source(s) -> input -> low cut (high-pass) -> high cut (low-pass) -> low shelf -> peaking bands -> high shelf -> destination
-//   Bypass:      source(s) -> input -> destination (settings are kept)
+//   source(s) -> input -> low cut (high-pass) -> high cut (low-pass) -> low shelf -> peaking bands -> high shelf -> [limiter] -> destination
+//   Bypass:      source(s) -> input -> [limiter] -> destination (settings are kept)
+//   The limiter (off by default) catches peaks that boosts push over 0 dBFS, which would otherwise clip (distort).
 
 export const RANGES = [6, 12, 18];   // selectable +/- dB slider range
 export const MAX_RANGE = 18;
@@ -14,6 +15,13 @@ export const HIGH_CUT = { min: 1000, max: 20000, off: 20000 }; // low-pass, Hz (
 // Web Audio reads Q on lowpass/highpass filters in dB (resonance), not as a plain number: a Butterworth
 // (Q = 1/sqrt 2, -3 dB at the cutoff, no bump) is 20*log10(1/sqrt 2) = -3.01 dB.
 const BUTTERWORTH_Q_DB = 20 * Math.log10(Math.SQRT1_2);
+
+// Limiter: a DynamicsCompressor set up as a fast, hard-knee limiter under full scale. Web Audio compressors add automatic
+// make-up gain (spec: 0.6 x the gain reduction at 0 dBFS), which would make everything louder when the limiter is on;
+// a fixed trim after it takes that back out, so quiet passages sound the same with the limiter on or off.
+// Measured (Chrome, 1 kHz, +18 dB boost): peaks stay under 0 dBFS; a -20 dBFS signal stays at -20 dBFS.
+export const LIMITER = { threshold: -2, knee: 0, ratio: 20, attack: 0.002, release: 0.15 };
+const LIMITER_TRIM_DB = -0.6 * -LIMITER.threshold * (1 - 1 / LIMITER.ratio);
 
 /** Round to 0.1 dB and clamp to +/-limit, without float noise like 1.3000000000000003. */
 const clampTo = (v, limit) => Math.round(Math.max(-limit, Math.min(limit, Number(v) || 0)) * 10) / 10;
@@ -83,11 +91,12 @@ function defaultStorage() {
  * @param {6|12|18} [options.defaultRange=12]
  * @param {Array} [options.presets]                built-in presets (default: BUILT_IN_PRESETS)
  * @param {number} [options.maxUserPresets=30]
+ * @param {boolean} [options.defaultLimiter=false]  limiter on when nothing is saved yet
  */
 export function createEqualizer(options = {}) {
   const {
     audioContext = null, destination = null, storageKey = "geq",
-    defaultMode = 3, defaultRange = 12, presets = BUILT_IN_PRESETS, maxUserPresets = 30,
+    defaultMode = 3, defaultRange = 12, presets = BUILT_IN_PRESETS, maxUserPresets = 30, defaultLimiter = false,
   } = options;
   const storage = options.storage === undefined ? defaultStorage() : options.storage;
   const k = (name) => `${storageKey}:${name}`;
@@ -101,6 +110,7 @@ export function createEqualizer(options = {}) {
   let mode = validMode(read("mode"));
   let range = validRange(read("range"));
   let bypass = read("bypass") === true;
+  let limiter = typeof read("limiter") === "boolean" ? read("limiter") : !!defaultLimiter;
   const savedCuts = read("cuts") || {};
   let cuts = { low: clampHz(savedCuts.low ?? LOW_CUT.off, LOW_CUT), high: clampHz(savedCuts.high ?? HIGH_CUT.off, HIGH_CUT) };
   const savedGains = read("gains") || {};
@@ -118,14 +128,17 @@ export function createEqualizer(options = {}) {
   const emit = () => { snapshot = null; listeners.forEach((fn) => { try { fn(); } catch (e) { console.error(e); } }); };
 
   // ---- audio graph ----
-  let ctx = audioContext, ownCtx = false, input = null, lowCut = null, highCut = null, filters = null;
+  let ctx = audioContext, ownCtx = false, input = null, lowCut = null, highCut = null, filters = null, limNode = null, limTrim = null;
   const sources = new Map();   // source node -> { el?, onPlay? }
 
   const out = () => destination || ctx.destination;
-  function route() {   // input -> chain, or straight to the output when bypassed
+  const tail = () => (limiter && limNode ? limNode : out());   // where the EQ (or the bypass) ends up
+  function route() {   // input -> chain, or straight to the output when bypassed; chain end -> limiter or output
     if (!input) return;
     try { input.disconnect(); } catch { /* not connected */ }
-    input.connect(bypass ? out() : lowCut);
+    input.connect(bypass ? tail() : lowCut);
+    const last = filters?.[filters.length - 1];
+    if (last) { try { last.disconnect(); } catch { /* ok */ } last.connect(tail()); }
   }
   function build() {
     [lowCut, highCut, ...(filters || [])].forEach((f) => { try { f?.disconnect(); } catch { /* ok */ } });
@@ -137,7 +150,7 @@ export function createEqualizer(options = {}) {
       if (b.q) f.Q.value = b.q;
       return f;
     });
-    [lowCut, highCut, ...filters].reduce((a, b) => (a.connect(b), b)).connect(out());
+    [lowCut, highCut, ...filters].reduce((a, b) => (a.connect(b), b));
     route();
   }
   function ensure() {
@@ -148,6 +161,13 @@ export function createEqualizer(options = {}) {
       ctx = new AC(); ownCtx = true;
     }
     input = ctx.createGain();
+    if (ctx.createDynamicsCompressor) {
+      limNode = ctx.createDynamicsCompressor();
+      for (const [k2, v] of Object.entries(LIMITER)) limNode[k2].value = v;
+      limTrim = ctx.createGain();
+      limTrim.gain.value = 10 ** (LIMITER_TRIM_DB / 20);
+      limNode.connect(limTrim).connect(out());
+    }
     build();
     return ctx;
   }
@@ -194,7 +214,7 @@ export function createEqualizer(options = {}) {
     getState() {
       if (!snapshot) {
         snapshot = Object.freeze({
-          mode, range, bypass,
+          mode, range, bypass, limiter,
           bands: MODES[mode],
           gains: Object.freeze(Object.fromEntries(ALL_IDS.map((id) => [id, heard(id)]))),
           values: Object.freeze(MODES[mode].map((b) => heard(b.id))),
@@ -242,6 +262,12 @@ export function createEqualizer(options = {}) {
     /** Bypass: the whole EQ (cuts + bands) drops out of the signal; settings are kept. */
     setBypass(on) {
       bypass = !!on; write("bypass", bypass);
+      route();
+      emit();
+    },
+    /** Limiter on / off: stops boosted peaks from clipping. Works with bypass too. */
+    setLimiter(on) {
+      limiter = !!on; write("limiter", limiter);
       route();
       emit();
     },
@@ -299,8 +325,8 @@ export function createEqualizer(options = {}) {
     /** Detach everything and drop the filters (and close the AudioContext if the EQ created it). */
     dispose() {
       eq.detach();
-      [input, lowCut, highCut, ...(filters || [])].forEach((n) => { try { n?.disconnect(); } catch { /* ok */ } });
-      input = lowCut = highCut = filters = null;
+      [input, lowCut, highCut, limNode, limTrim, ...(filters || [])].forEach((n) => { try { n?.disconnect(); } catch { /* ok */ } });
+      input = lowCut = highCut = filters = limNode = limTrim = null;
       if (ownCtx) { ctx.close?.().catch(() => {}); ctx = null; ownCtx = false; }
     },
   };
