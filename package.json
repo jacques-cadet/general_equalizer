@@ -1,0 +1,39 @@
+{
+  "name": "general_equalizer",
+  "version": "1.0.0",
+  "description": "A 3 / 7 / 11-band graphic equalizer for React on the Web Audio API: faders, low/high cut knobs, bypass, presets, themeable.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./style.css": "./dist/style.css",
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "index.d.ts", "README.md", "LICENSE"],
+  "sideEffects": ["*.css"],
+  "scripts": {
+    "dev": "vite --config demo/vite.config.js",
+    "build": "vite build",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "6.3.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "vite": "8.3.8",
+    "vitest": "5.0.5"
+  },
+  "keywords": ["react", "equalizer", "eq", "web-audio", "audio", "biquad", "music-player"],
+  "license": "MIT",
+  "repository": { "type": "git", "url": "git+https://github.com/jacques-cadet/general_equalizer.git" }
+}

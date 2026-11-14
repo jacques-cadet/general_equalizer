@@ -1,0 +1,111 @@
+/* general_equalizer: every class is prefixed geq-. Theme it by setting the --geq-* variables named below
+   anywhere above the component (e.g. :root, or a wrapper). Fonts are inherited from your app. */
+.geq, .geq-overlay {
+  --_bg: var(--geq-bg, #14161b);                       /* dialog background */
+  --_surface: var(--geq-surface, rgba(255, 255, 255, .06)); /* buttons, inputs */
+  --_surface-hover: var(--geq-surface-hover, rgba(255, 255, 255, .12));
+  --_text: var(--geq-text, #e8eaee);
+  --_muted: var(--geq-muted, rgba(232, 234, 238, .6));
+  --_accent: var(--geq-accent, #5ab0ff);                   /* active buttons, fader fill, readouts, knob arc */
+  --_accent-text: var(--geq-accent-text, #0b1118);              /* text on an active button */
+  --_thumb: var(--geq-thumb, #e8eaee);                    /* fader thumb + knob pointer */
+  --_thumb-active: var(--geq-thumb-active, #ffffff);             /* ... while adjusting */
+  --_glow: var(--geq-glow, rgba(90, 176, 255, .55));     /* glow on the adjusting thumb and on Bypass when on */
+  --_track: var(--geq-track, rgba(255, 255, 255, .18));   /* unlit fader / knob track */
+  --_radius: var(--geq-radius, 4px);
+  --_fader-height: var(--geq-fader-height, 180px);
+  --_overlay-bg: var(--geq-overlay-bg, rgba(0, 0, 0, .7));
+}
+
+.geq { color: var(--_text); font: inherit; }
+.geq *, .geq *::before, .geq *::after { box-sizing: border-box; }
+
+/* Header: title left; band switch + help right */
+.geq-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: 1rem; }
+.geq-title { margin: 0; font-size: 1.25em; font-weight: 600; color: var(--_accent); }
+.geq-head-tools { display: flex; align-items: center; gap: .5rem; }
+.geq-help { margin: -.5rem 0 1rem; font-size: .8em; color: var(--_muted); }
+
+/* Buttons and inputs */
+.geq-btn { appearance: none; border: 0; border-radius: var(--_radius); padding: .3em .7em; font: inherit; font-size: .85em; line-height: 1.4;
+  color: var(--_accent); background: var(--_surface); cursor: pointer; white-space: nowrap; }
+.geq-btn:hover:not(:disabled) { background: var(--_surface-hover); }
+.geq-btn.is-on { color: var(--_accent-text); background: var(--_accent); }
+.geq-btn:disabled { opacity: .45; cursor: default; }
+.geq-btn:focus-visible, .geq-input:focus-visible { outline: 2px solid var(--_accent); outline-offset: 1px; }
+.geq-help-btn { min-width: 2em; }
+.geq-bypass.is-on { box-shadow: 0 0 8px 1px var(--_glow); }
+.geq-group { display: inline-flex; gap: 2px; }
+.geq-input { border: 0; border-radius: var(--_radius); padding: .35em .6em; font: inherit; font-size: .85em; color: var(--_text); background: var(--_surface); }
+.geq-input::placeholder { color: var(--_muted); }
+.geq-input option, .geq-input optgroup { color: initial; background: initial; }
+
+/* Presets row */
+.geq-presets { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-bottom: 1rem; }
+.geq-presets select { min-width: 11rem; }
+.geq-save { display: flex; gap: .5rem; margin-left: auto; }
+.geq-save .geq-input { width: 10rem; }
+
+/* Knobs either side of the faders */
+.geq-main { display: flex; align-items: center; gap: .75rem; }
+.geq-bands { flex: 1; min-width: 0; display: flex; justify-content: space-around; text-align: center; }
+.geq.is-bypassed .geq-bands, .geq.is-bypassed .geq-knob { opacity: .4; }   /* still editable; just not heard */
+.geq-band { display: flex; flex-direction: column; align-items: center; gap: .15rem; flex: 1; min-width: 0; }
+.geq-band-label { font-size: .85em; }
+.geq-db { width: 100%; max-width: 4.5em; min-height: 1.4em; padding: 0; border: 0; border-radius: var(--_radius); outline: 0; text-align: center;
+  font: inherit; font-size: .85em; font-variant-numeric: tabular-nums; color: var(--_accent); caret-color: var(--_accent); background: transparent; }
+.geq-db:focus { background: var(--_surface); }
+
+/* Vertical fader: a horizontal range input rotated -90deg */
+.geq-fader-box { position: relative; width: 2rem; height: var(--_fader-height); }
+.geq-fader { -webkit-appearance: none; appearance: none; position: absolute; top: 50%; left: 50%; width: var(--_fader-height); height: 14px; margin: 0;
+  transform: translate(-50%, -50%) rotate(-90deg); background: transparent; cursor: pointer; }
+.geq-fader:focus { outline: none; }
+.geq-fader::-webkit-slider-runnable-track { height: 2px; background: var(--geq-fill, var(--_track)); }
+.geq-fader::-moz-range-track { height: 2px; background: var(--geq-fill, var(--_track)); }
+.geq-fader::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 4px; margin-top: -1px; border: 0; border-radius: 2px; background: var(--_thumb); }
+.geq-fader::-moz-range-thumb { width: 14px; height: 4px; border: 0; border-radius: 2px; background: var(--_thumb); }
+.geq-fader:hover::-webkit-slider-thumb, .geq-fader:active::-webkit-slider-thumb, .geq-fader:focus-visible::-webkit-slider-thumb { background: var(--_thumb-active); box-shadow: 0 0 6px 1px var(--_glow); }
+.geq-fader:hover::-moz-range-thumb, .geq-fader:active::-moz-range-thumb, .geq-fader:focus-visible::-moz-range-thumb { background: var(--_thumb-active); box-shadow: 0 0 6px 1px var(--_glow); }
+
+/* 11-band: smaller readouts / labels */
+.geq-dense .geq-db { font-size: .7em; }
+.geq-dense .geq-band-label { font-size: .7em; }
+
+/* Knob */
+.geq-knob { display: flex; flex: none; flex-direction: column; align-items: center; gap: .1rem; width: 4.5rem; text-align: center; user-select: none; -webkit-user-select: none; }
+.geq-knob-dial { line-height: 0; border-radius: 50%; cursor: ns-resize; touch-action: none; }
+.geq-knob-dial:focus { outline: none; }
+.geq-knob-dial:focus-visible { outline: 1px solid var(--_accent); outline-offset: 2px; }
+.geq-knob-cap { fill: var(--_surface); stroke: var(--_track); stroke-width: 1; }
+.geq-knob-track { fill: none; stroke: var(--_track); stroke-width: 3; stroke-linecap: round; }
+.geq-knob-value { fill: none; stroke: var(--_accent); stroke-width: 3; stroke-linecap: round; }
+.geq-knob-pointer { stroke: var(--_thumb); stroke-width: 3; stroke-linecap: round; }
+.geq-knob-dial:hover .geq-knob-pointer, .geq-knob-dial:active .geq-knob-pointer, .geq-knob-dial:focus-visible .geq-knob-pointer {
+  stroke: var(--_thumb-active); filter: drop-shadow(0 0 3px var(--_glow)); }
+.geq-knob-label { font-size: .75em; color: var(--_accent); white-space: nowrap; }
+.geq-knob-text { font-size: .75em; opacity: .8; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Footer: Bypass left, range centred, Reset / Done right */
+.geq-footer { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: .5rem; margin-top: 1rem; }
+.geq-bypass { justify-self: start; }
+.geq-done { display: flex; gap: .5rem; justify-self: end; }
+
+/* Dialog */
+.geq-overlay { position: fixed; inset: 0; z-index: 2000; display: flex; align-items: center; justify-content: center;
+  background: var(--_overlay-bg); backdrop-filter: blur(4px); }
+.geq-dialog { box-sizing: border-box; width: min(680px, 94vw); max-height: calc(100dvh - 24px); overflow-y: auto; overscroll-behavior: contain;
+  padding: 1.25rem 1.5rem; border-radius: var(--_radius); background: var(--_bg); box-shadow: 0 20px 60px rgba(0, 0, 0, .7); }
+.geq-dialog.geq-wide { width: min(900px, 96vw); }
+
+/* Phones */
+@media (max-width: 575.98px) {
+  .geq-main { flex-wrap: wrap; justify-content: space-between; }
+  .geq-main .geq-bands { order: 3; flex-basis: 100%; }
+  .geq-footer { grid-template-columns: 1fr 1fr; }
+  .geq-range { grid-column: 1 / -1; grid-row: 1; justify-self: center; }
+  .geq-dialog { padding: 1rem .9rem; }
+  .geq-dense .geq-fader-box { width: 1.4rem; }
+  .geq-dense .geq-db { font-size: .65em; }
+  .geq-dense .geq-band-label { font-size: .55em; letter-spacing: -.02em; }
+}
