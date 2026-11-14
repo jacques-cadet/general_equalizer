@@ -280,6 +280,16 @@ export function createEqualizer(options = {}) {
       emit();
       return preset;
     },
+    /** Save the current values into an existing user preset of the current mode (same id and name). Returns it, or null. */
+    updatePreset(id) {
+      const old = userPresets.find((p) => p.id === id);
+      if (!old || old.mode !== mode) return null;
+      const preset = { ...old, values: eq.getValues() };
+      userPresets = userPresets.map((p) => (p.id === id ? preset : p));
+      write("presets", userPresets);
+      emit();
+      return preset;
+    },
     deletePreset(id) {
       userPresets = userPresets.filter((p) => p.id !== id);
       write("presets", userPresets);

@@ -90,6 +90,8 @@ export interface EqualizerInstance {
 
   applyPreset(id: string): boolean;
   savePreset(name: string): EqUserPreset | null;
+  /** Save the current values into an existing user preset of the current mode. */
+  updatePreset(id: string): EqUserPreset | null;
   deletePreset(id: string): void;
 
   /** Detach everything, drop the filters, and close the AudioContext if the EQ created it. */

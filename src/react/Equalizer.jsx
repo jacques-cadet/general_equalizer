@@ -68,11 +68,15 @@ export default function Equalizer({ eq, title = "Equalizer", helpText, showPrese
   const [name, setName] = useState("");
   const helpId = useId();
   const mine = st.userPresets.filter((p) => p.mode === mode);
+  // A picked user preset stays picked while you edit, so it can be updated; a built-in one is let go on the first change.
+  const mineOn = mine.find((p) => p.id === picked);
+  const edited = !!mineOn && bands.some((b, i) => mineOn.values[i] !== gains[b.id]);
+  const keepMine = (id) => (st.userPresets.some((p) => p.id === id) ? id : "");
   const helpBody = helpText === false ? null
     : typeof helpText === "function" ? helpText(bands, range)
     : helpText ?? defaultHelp(bands, range);
 
-  const change = (id, v) => { eq.setGain(id, v); setPicked(""); };
+  const change = (id, v) => { eq.setGain(id, v); setPicked(keepMine); };
   const onPreset = (id) => { setPicked(id); if (id) eq.applyPreset(id); };
   const onSave = (e) => {
     e.preventDefault();
@@ -113,9 +117,11 @@ export default function Equalizer({ eq, title = "Equalizer", helpText, showPrese
               </optgroup>
             )}
           </select>
-          {mine.some((p) => p.id === picked) && (
+          {mineOn && (<>
+            <Btn on onClick={() => eq.updatePreset(picked)} disabled={!edited}
+              title={edited ? `Save the current settings into "${mineOn.name}"` : "Change a band to update this preset"}>Update</Btn>
             <Btn onClick={() => { eq.deletePreset(picked); setPicked(""); }}>Delete</Btn>
-          )}
+          </>)}
           <form className="geq-save" onSubmit={onSave}>
             <input className="geq-input" value={name} maxLength={30} placeholder="Save as…"
               onChange={(e) => setName(e.target.value)} aria-label="Preset name" />
@@ -152,7 +158,7 @@ export default function Equalizer({ eq, title = "Equalizer", helpText, showPrese
           ))}
         </div>
         <div className="geq-done">
-          <Btn onClick={() => { eq.reset(); setPicked(""); }}>Reset</Btn>
+          <Btn onClick={() => { eq.reset(); setPicked(keepMine); }}>Reset</Btn>
           {onDone && <Btn on onClick={onDone}>Done</Btn>}
         </div>
       </div>

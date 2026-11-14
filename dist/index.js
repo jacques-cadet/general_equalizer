@@ -1,26 +1,26 @@
 import { useEffect as e, useId as t, useRef as n, useState as r, useSyncExternalStore as i } from "react";
-import { jsx as a, jsxs as o } from "react/jsx-runtime";
-import { createPortal as s } from "react-dom";
+import { Fragment as a, jsx as o, jsxs as s } from "react/jsx-runtime";
+import { createPortal as c } from "react-dom";
 // src/engine.js
-var c = [
+var l = [
 	6,
 	12,
 	18
-], l = 18, u = .1, d = {
+], u = 18, d = .1, f = {
 	min: 20,
 	max: 1e3,
 	off: 20
-}, f = {
+}, p = {
 	min: 1e3,
 	max: 2e4,
 	off: 2e4
-}, p = 20 * Math.log10(Math.SQRT1_2), m = (e, t) => Math.round(Math.max(-t, Math.min(t, Number(e) || 0)) * 10) / 10, h = (e, { min: t, max: n }) => Math.round(Math.max(t, Math.min(n, Number(e) || 0))), g = (e) => +(1 / (2 * Math.sinh(Math.LN2 / 2 * e))).toFixed(2), _ = (e) => e >= 1e3 ? `${e / 1e3}k` : `${e}`;
-function v(e, t) {
+}, m = 20 * Math.log10(Math.SQRT1_2), h = (e, t) => Math.round(Math.max(-t, Math.min(t, Number(e) || 0)) * 10) / 10, g = (e, { min: t, max: n }) => Math.round(Math.max(t, Math.min(n, Number(e) || 0))), _ = (e) => +(1 / (2 * Math.sinh(Math.LN2 / 2 * e))).toFixed(2), v = (e) => e >= 1e3 ? `${e / 1e3}k` : `${e}`;
+function y(e, t) {
 	let n = t.map((e, n) => n === 0 ? 0 : Math.log2(e / t[n - 1]));
 	return t.map((r, i) => {
 		let a = {
 			id: `${e}:f${r}`,
-			label: _(r),
+			label: v(r),
 			freq: r
 		};
 		return i === 0 ? {
@@ -32,17 +32,17 @@ function v(e, t) {
 		} : {
 			...a,
 			type: "peaking",
-			q: g((n[i] + n[i + 1]) / 2)
+			q: _((n[i] + n[i + 1]) / 2)
 		};
 	});
 }
-var y = Object.freeze({
-	3: v(3, [
+var b = Object.freeze({
+	3: y(3, [
 		120,
 		1e3,
 		8e3
 	]),
-	7: v(7, [
+	7: y(7, [
 		64,
 		160,
 		400,
@@ -51,7 +51,7 @@ var y = Object.freeze({
 		4e3,
 		8e3
 	]),
-	11: v(11, [
+	11: y(11, [
 		32,
 		63,
 		125,
@@ -64,11 +64,11 @@ var y = Object.freeze({
 		5300,
 		8e3
 	])
-}), b = [
+}), x = [
 	3,
 	7,
 	11
-], x = b.flatMap((e) => y[e]).map((e) => e.id), S = Object.freeze([
+], S = x.flatMap((e) => b[e]).map((e) => e.id), C = Object.freeze([
 	{
 		id: "b-flat",
 		name: "Flat",
@@ -267,35 +267,35 @@ var y = Object.freeze({
 			]
 		}
 	}
-]), C = /* @__PURE__ */ new WeakMap();
-function w(e, t) {
-	let n = C.get(e);
-	n || C.set(e, n = /* @__PURE__ */ new WeakMap());
+]), w = /* @__PURE__ */ new WeakMap();
+function T(e, t) {
+	let n = w.get(e);
+	n || w.set(e, n = /* @__PURE__ */ new WeakMap());
 	let r = n.get(t);
 	return r || n.set(t, r = e.createMediaElementSource(t)), r;
 }
-function T() {
+function E() {
 	try {
 		return typeof window < "u" && window.localStorage ? window.localStorage : null;
 	} catch {
 		return null;
 	}
 }
-function E(e = {}) {
-	let { audioContext: t = null, destination: n = null, storageKey: r = "geq", defaultMode: i = 3, defaultRange: a = 12, presets: o = S, maxUserPresets: s = 30 } = e, l = e.storage === void 0 ? T() : e.storage, u = (e) => `${r}:${e}`, g = (e) => {
+function D(e = {}) {
+	let { audioContext: t = null, destination: n = null, storageKey: r = "geq", defaultMode: i = 3, defaultRange: a = 12, presets: o = C, maxUserPresets: s = 30 } = e, c = e.storage === void 0 ? E() : e.storage, u = (e) => `${r}:${e}`, d = (e) => {
 		try {
-			return JSON.parse(l?.getItem(u(e)) ?? "null");
+			return JSON.parse(c?.getItem(u(e)) ?? "null");
 		} catch {
 			return null;
 		}
 	}, _ = (e, t) => {
 		try {
-			l?.setItem(u(e), JSON.stringify(t));
+			c?.setItem(u(e), JSON.stringify(t));
 		} catch {}
-	}, v = (e) => b.includes(e) ? e : b.includes(i) ? i : 3, C = (e) => c.includes(e) ? e : c.includes(a) ? a : 12, E = (e) => e && typeof e.name == "string" && b.includes(e.mode) && Array.isArray(e.values), D = v(g("mode")), O = C(g("range")), k = g("bypass") === !0, A = g("cuts") || {}, j = {
-		low: h(A.low ?? d.off, d),
-		high: h(A.high ?? f.off, f)
-	}, M = g("gains") || {}, N = Object.fromEntries(x.map((e) => [e, Number.isFinite(M[e]) ? m(M[e], 18) : 0])), P = (Array.isArray(g("presets")) ? g("presets") : []).filter(E), F = (e) => m(e, O), I = (e) => m(N[e], O), L = /* @__PURE__ */ new Set(), R = null, z = () => {
+	}, v = (e) => x.includes(e) ? e : x.includes(i) ? i : 3, y = (e) => l.includes(e) ? e : l.includes(a) ? a : 12, w = (e) => e && typeof e.name == "string" && x.includes(e.mode) && Array.isArray(e.values), D = v(d("mode")), O = y(d("range")), k = d("bypass") === !0, A = d("cuts") || {}, j = {
+		low: g(A.low ?? f.off, f),
+		high: g(A.high ?? p.off, p)
+	}, M = d("gains") || {}, N = Object.fromEntries(S.map((e) => [e, Number.isFinite(M[e]) ? h(M[e], 18) : 0])), P = (Array.isArray(d("presets")) ? d("presets") : []).filter(w), F = (e) => h(e, O), I = (e) => h(N[e], O), L = /* @__PURE__ */ new Set(), R = null, z = () => {
 		R = null, L.forEach((e) => {
 			try {
 				e();
@@ -321,7 +321,7 @@ function E(e = {}) {
 			try {
 				e?.disconnect();
 			} catch {}
-		}), U = B.createBiquadFilter(), U.type = "highpass", U.frequency.value = j.low, U.Q.value = p, W = B.createBiquadFilter(), W.type = "lowpass", W.frequency.value = j.high, W.Q.value = p, G = y[D].map((e) => {
+		}), U = B.createBiquadFilter(), U.type = "highpass", U.frequency.value = j.low, U.Q.value = m, W = B.createBiquadFilter(), W.type = "lowpass", W.frequency.value = j.high, W.Q.value = m, G = b[D].map((e) => {
 			let t = B.createBiquadFilter();
 			return t.type = e.type, t.frequency.value = e.freq, t.gain.value = I(e.id), e.q && (t.Q.value = e.q), t;
 		}), [
@@ -344,7 +344,7 @@ function E(e = {}) {
 	}, Q = {
 		attach(e) {
 			X();
-			let t = w(B, e);
+			let t = T(B, e);
 			if (K.has(t)) return () => Q.detach(e);
 			try {
 				t.disconnect();
@@ -384,9 +384,9 @@ function E(e = {}) {
 				mode: D,
 				range: O,
 				bypass: k,
-				bands: y[D],
-				gains: Object.freeze(Object.fromEntries(x.map((e) => [e, I(e)]))),
-				values: Object.freeze(y[D].map((e) => I(e.id))),
+				bands: b[D],
+				gains: Object.freeze(Object.fromEntries(S.map((e) => [e, I(e)]))),
+				values: Object.freeze(b[D].map((e) => I(e.id))),
 				cuts: Object.freeze({ ...j }),
 				presets: o,
 				userPresets: Object.freeze(P.slice())
@@ -406,20 +406,20 @@ function E(e = {}) {
 				...N,
 				[e]: F(t)
 			};
-			let n = y[D].findIndex((t) => t.id === e);
+			let n = b[D].findIndex((t) => t.id === e);
 			G && n >= 0 && (G[n].gain.value = I(e)), _("gains", N), z();
 		},
 		applyValues(e) {
-			y[D].forEach((t, n) => {
+			b[D].forEach((t, n) => {
 				N = {
 					...N,
 					[t.id]: F(e?.[n])
 				}, G && (G[n].gain.value = I(t.id));
 			}), _("gains", N), z();
 		},
-		getValues: () => y[D].map((e) => I(e.id)),
+		getValues: () => b[D].map((e) => I(e.id)),
 		setRange(e) {
-			c.includes(e) && e !== O && (O = e, _("range", O), G && y[D].forEach((e, t) => {
+			l.includes(e) && e !== O && (O = e, _("range", O), G && b[D].forEach((e, t) => {
 				G[t].gain.value = I(e.id);
 			}), z());
 		},
@@ -428,16 +428,16 @@ function E(e = {}) {
 		},
 		setCut(e, t) {
 			if (e !== "low" && e !== "high") return;
-			let n = e === "low" ? d : f;
+			let n = e === "low" ? f : p;
 			j = {
 				...j,
-				[e]: h(t, n)
+				[e]: g(t, n)
 			}, _("cuts", j);
 			let r = e === "low" ? U : W;
 			r && r.frequency.setTargetAtTime(j[e], B.currentTime, .015), z();
 		},
 		reset() {
-			Q.applyValues(y[D].map(() => 0)), Q.setCut("low", d.off), Q.setCut("high", f.off);
+			Q.applyValues(b[D].map(() => 0)), Q.setCut("low", f.off), Q.setCut("high", p.off);
 		},
 		applyPreset(e) {
 			let t = o.find((t) => t.id === e), n = P.find((t) => t.id === e), r = t ? t.values[D] : n && n.mode === D ? n.values : null;
@@ -453,6 +453,15 @@ function E(e = {}) {
 				values: Q.getValues()
 			};
 			return P = [...P.filter((e) => e.mode !== D || e.name.toLowerCase() !== t.toLowerCase()), n].slice(-s), _("presets", P), z(), n;
+		},
+		updatePreset(e) {
+			let t = P.find((t) => t.id === e);
+			if (!t || t.mode !== D) return null;
+			let n = {
+				...t,
+				values: Q.getValues()
+			};
+			return P = P.map((t) => t.id === e ? n : t), _("presets", P), z(), n;
 		},
 		deletePreset(e) {
 			P = P.filter((t) => t.id !== e), _("presets", P), z();
@@ -473,16 +482,16 @@ function E(e = {}) {
 	return Q;
 }
 // src/react/Knob.jsx
-var D = 270, O = 22, k = 28, A = (e, t = O) => {
-	let n = (-135 + e * D - 90) * (Math.PI / 180);
-	return [k + t * Math.cos(n), k + t * Math.sin(n)];
-}, j = (e, t) => {
+var O = 270, k = 22, A = 28, j = (e, t = k) => {
+	let n = (-135 + e * O - 90) * (Math.PI / 180);
+	return [A + t * Math.cos(n), A + t * Math.sin(n)];
+}, M = (e, t) => {
 	if (t - e < .002) return "";
-	let [n, r] = A(e), [i, a] = A(t);
-	return `M ${n} ${r} A ${O} ${O} 0 ${+((t - e) * D > 180)} 1 ${i} ${a}`;
-}, M = (e) => e < 1e3 ? `${Math.round(e)} Hz` : `${(e / 1e3).toFixed(+(e < 1e4))}k`;
-function N({ label: t, value: r, min: i, max: s, off: c, onChange: l, offText: u = "Off", format: d = M }) {
-	let f = n(null), p = n(null), m = (e) => Math.log(e / i) / Math.log(s / i), h = (e) => i * (s / i) ** +Math.max(0, Math.min(1, e)), g = m(r), _ = m(c ?? i), v = (e) => l(h(m(r) + e));
+	let [n, r] = j(e), [i, a] = j(t);
+	return `M ${n} ${r} A ${k} ${k} 0 ${+((t - e) * O > 180)} 1 ${i} ${a}`;
+}, N = (e) => e < 1e3 ? `${Math.round(e)} Hz` : `${(e / 1e3).toFixed(+(e < 1e4))}k`;
+function P({ label: t, value: r, min: i, max: a, off: c, onChange: l, offText: u = "Off", format: d = N }) {
+	let f = n(null), p = n(null), m = (e) => Math.log(e / i) / Math.log(a / i), h = (e) => i * (a / i) ** +Math.max(0, Math.min(1, e)), g = m(r), _ = m(c ?? i), v = (e) => l(h(m(r) + e));
 	e(() => {
 		let e = f.current, t = (e) => {
 			e.preventDefault(), v((e.deltaY < 0 ? 1 : -1) * (e.shiftKey ? .005 : .02));
@@ -509,19 +518,19 @@ function N({ label: t, value: r, min: i, max: s, off: c, onChange: l, offText: u
 			PageUp: .1,
 			PageDown: -.1
 		};
-		e.key in n ? (e.preventDefault(), v(n[e.key])) : e.key === "Home" ? (e.preventDefault(), l(i)) : e.key === "End" && (e.preventDefault(), l(s));
-	}, C = c != null && Math.abs(r - c) < .5, w = C ? u : d(r), [T, E] = A(g, 13), [D, O] = A(g, 21);
-	return /* @__PURE__ */ o("div", {
+		e.key in n ? (e.preventDefault(), v(n[e.key])) : e.key === "Home" ? (e.preventDefault(), l(i)) : e.key === "End" && (e.preventDefault(), l(a));
+	}, C = c != null && Math.abs(r - c) < .5, w = C ? u : d(r), [T, E] = j(g, 13), [D, O] = j(g, 21);
+	return /* @__PURE__ */ s("div", {
 		className: `geq-knob${C ? "" : " is-on"}`,
 		children: [
-			/* @__PURE__ */ a("div", {
+			/* @__PURE__ */ o("div", {
 				ref: f,
 				className: "geq-knob-dial",
 				role: "slider",
 				tabIndex: 0,
 				"aria-label": t,
 				"aria-valuemin": i,
-				"aria-valuemax": s,
+				"aria-valuemax": a,
 				"aria-valuenow": Math.round(r),
 				"aria-valuetext": w,
 				onPointerDown: y,
@@ -531,27 +540,27 @@ function N({ label: t, value: r, min: i, max: s, off: c, onChange: l, offText: u
 				onKeyDown: S,
 				onDoubleClick: () => c != null && l(c),
 				title: `${t}: drag, scroll or use the arrow keys${c == null ? "" : "; double-click = off"}`,
-				children: /* @__PURE__ */ o("svg", {
+				children: /* @__PURE__ */ s("svg", {
 					viewBox: "0 0 56 56",
 					width: "56",
 					height: "56",
 					"aria-hidden": "true",
 					children: [
-						/* @__PURE__ */ a("circle", {
-							cx: k,
-							cy: k,
+						/* @__PURE__ */ o("circle", {
+							cx: A,
+							cy: A,
 							r: 17,
 							className: "geq-knob-cap"
 						}),
-						/* @__PURE__ */ a("path", {
-							d: j(0, 1),
+						/* @__PURE__ */ o("path", {
+							d: M(0, 1),
 							className: "geq-knob-track"
 						}),
-						/* @__PURE__ */ a("path", {
-							d: _ <= g ? j(_, g) : j(g, _),
+						/* @__PURE__ */ o("path", {
+							d: _ <= g ? M(_, g) : M(g, _),
 							className: "geq-knob-value"
 						}),
-						/* @__PURE__ */ a("line", {
+						/* @__PURE__ */ o("line", {
 							x1: T,
 							y1: E,
 							x2: D,
@@ -561,11 +570,11 @@ function N({ label: t, value: r, min: i, max: s, off: c, onChange: l, offText: u
 					]
 				})
 			}),
-			/* @__PURE__ */ a("span", {
+			/* @__PURE__ */ o("span", {
 				className: "geq-knob-label",
 				children: t
 			}),
-			/* @__PURE__ */ a("span", {
+			/* @__PURE__ */ o("span", {
 				className: "geq-knob-text",
 				children: w
 			})
@@ -573,24 +582,24 @@ function N({ label: t, value: r, min: i, max: s, off: c, onChange: l, offText: u
 	});
 }
 // src/react/useEqualizer.js
-function P(e) {
+function F(e) {
 	return i(e.subscribe, e.getState, e.getState);
 }
 // src/react/Equalizer.jsx
-var F = (e) => `${e > 0 ? "+" : ""}${e.toFixed(1)}`;
-function I({ value: e, label: t, clampDb: n, onChange: i }) {
-	let [o, s] = r(null), c = () => {
-		if (o !== null) {
-			let e = parseFloat(o.replace(",", "."));
+var I = (e) => `${e > 0 ? "+" : ""}${e.toFixed(1)}`;
+function L({ value: e, label: t, clampDb: n, onChange: i }) {
+	let [a, s] = r(null), c = () => {
+		if (a !== null) {
+			let e = parseFloat(a.replace(",", "."));
 			Number.isFinite(e) && i(n(e)), s(null);
 		}
 	};
-	return /* @__PURE__ */ a("input", {
+	return /* @__PURE__ */ o("input", {
 		className: "geq-db",
 		type: "text",
 		inputMode: "decimal",
 		"aria-label": `${t} Hz gain in dB`,
-		value: o ?? F(e),
+		value: a ?? I(e),
 		onChange: (e) => s(e.target.value),
 		onFocus: (e) => e.target.select(),
 		onBlur: c,
@@ -599,196 +608,202 @@ function I({ value: e, label: t, clampDb: n, onChange: i }) {
 			else if (t.key === "Escape") t.stopPropagation(), s(null), t.currentTarget.blur();
 			else if (t.key === "ArrowUp" || t.key === "ArrowDown") {
 				t.preventDefault();
-				let r = (t.shiftKey ? 1 : u) * (t.key === "ArrowUp" ? 1 : -1);
+				let r = (t.shiftKey ? 1 : d) * (t.key === "ArrowUp" ? 1 : -1);
 				s(null), i(n(e + r));
 			}
 		}
 	});
 }
-var L = (e, t) => {
+var R = (e, t) => {
 	let n = (e + t) / (2 * t) * 100, [r, i] = n >= 50 ? [50, n] : [n, 50];
 	return `linear-gradient(to right, var(--_track) ${r}%, var(--_accent) ${r}%, var(--_accent) ${i}%, var(--_track) ${i}%)`;
-}, R = (e, t) => `${e[0].label} Hz – ${e[e.length - 1].label.replace("k", " k")}Hz · ±${t} dB in 0.1 dB steps · type a value (e.g. 1.3) or use ↑/↓ · double-click a band or knob to reset it`, z = ({ on: e, className: t = "", ...n }) => /* @__PURE__ */ a("button", {
+}, z = (e, t) => `${e[0].label} Hz – ${e[e.length - 1].label.replace("k", " k")}Hz · ±${t} dB in 0.1 dB steps · type a value (e.g. 1.3) or use ↑/↓ · double-click a band or knob to reset it`, B = ({ on: e, className: t = "", ...n }) => /* @__PURE__ */ o("button", {
 	type: "button",
 	className: `geq-btn${e ? " is-on" : ""} ${t}`.trim(),
 	...n
 });
-function B({ eq: e, title: n = "Equalizer", helpText: i, showPresets: s = !0, showCuts: l = !0, showModes: p = !0, onDone: m, className: h = "", ...g }) {
-	let _ = P(e), { mode: v, range: y, bypass: x, bands: S, gains: C, cuts: w } = _, [T, E] = r(!1), [D, O] = r(""), [k, A] = r(""), j = t(), M = _.userPresets.filter((e) => e.mode === v), F = i === !1 ? null : typeof i == "function" ? i(S, y) : i ?? R(S, y), B = (t, n) => {
-		e.setGain(t, n), O("");
-	}, V = (t) => {
-		O(t), t && e.applyPreset(t);
-	}, H = (t) => {
+function V({ eq: e, title: n = "Equalizer", helpText: i, showPresets: c = !0, showCuts: u = !0, showModes: m = !0, onDone: h, className: g = "", ..._ }) {
+	let v = F(e), { mode: y, range: b, bypass: S, bands: C, gains: w, cuts: T } = v, [E, D] = r(!1), [O, k] = r(""), [A, j] = r(""), M = t(), N = v.userPresets.filter((e) => e.mode === y), I = N.find((e) => e.id === O), V = !!I && C.some((e, t) => I.values[t] !== w[e.id]), H = (e) => v.userPresets.some((t) => t.id === e) ? e : "", U = i === !1 ? null : typeof i == "function" ? i(C, b) : i ?? z(C, b), W = (t, n) => {
+		e.setGain(t, n), k(H);
+	}, G = (t) => {
+		k(t), t && e.applyPreset(t);
+	}, K = (t) => {
 		t.preventDefault();
-		let n = e.savePreset(k);
-		n && (O(n.id), A(""));
+		let n = e.savePreset(A);
+		n && (k(n.id), j(""));
 	};
-	return /* @__PURE__ */ o("div", {
-		className: `geq${S.length > 7 ? " geq-dense" : ""}${x ? " is-bypassed" : ""} ${h}`.trim(),
-		...g,
+	return /* @__PURE__ */ s("div", {
+		className: `geq${C.length > 7 ? " geq-dense" : ""}${S ? " is-bypassed" : ""} ${g}`.trim(),
+		..._,
 		children: [
-			/* @__PURE__ */ o("div", {
+			/* @__PURE__ */ s("div", {
 				className: "geq-head",
-				children: [n ? /* @__PURE__ */ a("h2", {
+				children: [n ? /* @__PURE__ */ o("h2", {
 					className: "geq-title",
 					children: n
-				}) : /* @__PURE__ */ a("span", {}), /* @__PURE__ */ o("div", {
+				}) : /* @__PURE__ */ o("span", {}), /* @__PURE__ */ s("div", {
 					className: "geq-head-tools",
-					children: [p && /* @__PURE__ */ a("div", {
+					children: [m && /* @__PURE__ */ o("div", {
 						className: "geq-group",
 						role: "group",
 						"aria-label": "Number of bands",
-						children: b.map((t) => /* @__PURE__ */ o(z, {
-							on: v === t,
-							"aria-pressed": v === t,
+						children: x.map((t) => /* @__PURE__ */ s(B, {
+							on: y === t,
+							"aria-pressed": y === t,
 							onClick: () => {
-								e.setMode(t), O("");
+								e.setMode(t), k("");
 							},
 							children: [t, "-band"]
 						}, t))
-					}), F != null && /* @__PURE__ */ a(z, {
-						on: T,
+					}), U != null && /* @__PURE__ */ o(B, {
+						on: E,
 						className: "geq-help-btn",
-						"aria-expanded": T,
-						"aria-controls": j,
+						"aria-expanded": E,
+						"aria-controls": M,
 						"aria-label": "Help",
 						title: "Help",
-						onClick: () => E((e) => !e),
+						onClick: () => D((e) => !e),
 						children: "?"
 					})]
 				})]
 			}),
-			T && F != null && /* @__PURE__ */ a("p", {
-				id: j,
+			E && U != null && /* @__PURE__ */ o("p", {
+				id: M,
 				className: "geq-help",
-				children: F
+				children: U
 			}),
-			s && /* @__PURE__ */ o("div", {
+			c && /* @__PURE__ */ s("div", {
 				className: "geq-presets",
 				children: [
-					/* @__PURE__ */ o("select", {
+					/* @__PURE__ */ s("select", {
 						className: "geq-input",
-						value: D,
-						onChange: (e) => V(e.target.value),
+						value: O,
+						onChange: (e) => G(e.target.value),
 						"aria-label": "Preset",
 						children: [
-							/* @__PURE__ */ a("option", {
+							/* @__PURE__ */ o("option", {
 								value: "",
 								children: "Preset…"
 							}),
-							/* @__PURE__ */ a("optgroup", {
+							/* @__PURE__ */ o("optgroup", {
 								label: "Built-in",
-								children: _.presets.map((e) => /* @__PURE__ */ a("option", {
+								children: v.presets.map((e) => /* @__PURE__ */ o("option", {
 									value: e.id,
 									children: e.name
 								}, e.id))
 							}),
-							M.length > 0 && /* @__PURE__ */ a("optgroup", {
+							N.length > 0 && /* @__PURE__ */ o("optgroup", {
 								label: "My presets",
-								children: M.map((e) => /* @__PURE__ */ a("option", {
+								children: N.map((e) => /* @__PURE__ */ o("option", {
 									value: e.id,
 									children: e.name
 								}, e.id))
 							})
 						]
 					}),
-					M.some((e) => e.id === D) && /* @__PURE__ */ a(z, {
+					I && /* @__PURE__ */ s(a, { children: [/* @__PURE__ */ o(B, {
+						on: !0,
+						onClick: () => e.updatePreset(O),
+						disabled: !V,
+						title: V ? `Save the current settings into "${I.name}"` : "Change a band to update this preset",
+						children: "Update"
+					}), /* @__PURE__ */ o(B, {
 						onClick: () => {
-							e.deletePreset(D), O("");
+							e.deletePreset(O), k("");
 						},
 						children: "Delete"
-					}),
-					/* @__PURE__ */ o("form", {
+					})] }),
+					/* @__PURE__ */ s("form", {
 						className: "geq-save",
-						onSubmit: H,
-						children: [/* @__PURE__ */ a("input", {
+						onSubmit: K,
+						children: [/* @__PURE__ */ o("input", {
 							className: "geq-input",
-							value: k,
+							value: A,
 							maxLength: 30,
 							placeholder: "Save as…",
-							onChange: (e) => A(e.target.value),
+							onChange: (e) => j(e.target.value),
 							"aria-label": "Preset name"
-						}), /* @__PURE__ */ a(z, {
+						}), /* @__PURE__ */ o(B, {
 							type: "submit",
 							on: !0,
-							disabled: !k.trim(),
+							disabled: !A.trim(),
 							children: "Save"
 						})]
 					})
 				]
 			}),
-			/* @__PURE__ */ o("div", {
+			/* @__PURE__ */ s("div", {
 				className: "geq-main",
 				children: [
-					l && /* @__PURE__ */ a(N, {
+					u && /* @__PURE__ */ o(P, {
 						label: "Low cut",
-						value: w.low,
-						min: d.min,
-						max: d.max,
-						off: d.off,
+						value: T.low,
+						min: f.min,
+						max: f.max,
+						off: f.off,
 						onChange: (t) => e.setCut("low", t)
 					}),
-					/* @__PURE__ */ a("div", {
+					/* @__PURE__ */ o("div", {
 						className: "geq-bands",
-						children: S.map((t) => /* @__PURE__ */ o("div", {
+						children: C.map((t) => /* @__PURE__ */ s("div", {
 							className: "geq-band",
 							children: [
-								/* @__PURE__ */ a(I, {
-									value: C[t.id],
+								/* @__PURE__ */ o(L, {
+									value: w[t.id],
 									label: t.label,
 									clampDb: e.clampDb,
-									onChange: (e) => B(t.id, e)
+									onChange: (e) => W(t.id, e)
 								}),
-								/* @__PURE__ */ a("div", {
+								/* @__PURE__ */ o("div", {
 									className: "geq-fader-box",
-									children: /* @__PURE__ */ a("input", {
+									children: /* @__PURE__ */ o("input", {
 										type: "range",
 										className: "geq-fader",
-										min: -y,
-										max: y,
-										step: u,
-										value: C[t.id],
-										style: { "--geq-fill": L(C[t.id], y) },
-										onChange: (e) => B(t.id, +e.target.value),
+										min: -b,
+										max: b,
+										step: d,
+										value: w[t.id],
+										style: { "--geq-fill": R(w[t.id], b) },
+										onChange: (e) => W(t.id, +e.target.value),
 										"aria-label": `${t.label} Hz`,
-										onDoubleClick: () => B(t.id, 0)
+										onDoubleClick: () => W(t.id, 0)
 									})
 								}),
-								/* @__PURE__ */ a("span", {
+								/* @__PURE__ */ o("span", {
 									className: "geq-band-label",
 									children: t.label
 								})
 							]
 						}, t.id))
 					}),
-					l && /* @__PURE__ */ a(N, {
+					u && /* @__PURE__ */ o(P, {
 						label: "High cut",
-						value: w.high,
-						min: f.min,
-						max: f.max,
-						off: f.off,
+						value: T.high,
+						min: p.min,
+						max: p.max,
+						off: p.off,
 						onChange: (t) => e.setCut("high", t)
 					})
 				]
 			}),
-			/* @__PURE__ */ o("div", {
+			/* @__PURE__ */ s("div", {
 				className: "geq-footer",
 				children: [
-					/* @__PURE__ */ a(z, {
-						on: x,
+					/* @__PURE__ */ o(B, {
+						on: S,
 						className: "geq-bypass",
-						"aria-pressed": x,
-						onClick: () => e.setBypass(!x),
+						"aria-pressed": S,
+						onClick: () => e.setBypass(!S),
 						title: "Take the EQ out of the sound (settings are kept)",
-						children: x ? "Bypassed" : "Bypass"
+						children: S ? "Bypassed" : "Bypass"
 					}),
-					/* @__PURE__ */ a("div", {
+					/* @__PURE__ */ o("div", {
 						className: "geq-group geq-range",
 						role: "group",
 						"aria-label": "Fader range",
-						children: c.map((t) => /* @__PURE__ */ o(z, {
-							on: y === t,
-							"aria-pressed": y === t,
+						children: l.map((t) => /* @__PURE__ */ s(B, {
+							on: b === t,
+							"aria-pressed": b === t,
 							onClick: () => e.setRange(t),
 							children: [
 								"±",
@@ -797,16 +812,16 @@ function B({ eq: e, title: n = "Equalizer", helpText: i, showPresets: s = !0, sh
 							]
 						}, t))
 					}),
-					/* @__PURE__ */ o("div", {
+					/* @__PURE__ */ s("div", {
 						className: "geq-done",
-						children: [/* @__PURE__ */ a(z, {
+						children: [/* @__PURE__ */ o(B, {
 							onClick: () => {
-								e.reset(), O("");
+								e.reset(), k(H);
 							},
 							children: "Reset"
-						}), m && /* @__PURE__ */ a(z, {
+						}), h && /* @__PURE__ */ o(B, {
 							on: !0,
-							onClick: m,
+							onClick: h,
 							children: "Done"
 						})]
 					})
@@ -816,29 +831,29 @@ function B({ eq: e, title: n = "Equalizer", helpText: i, showPresets: s = !0, sh
 	});
 }
 // src/react/EqualizerModal.jsx
-function V({ eq: t, open: n = !0, onClose: r, title: i = "Equalizer", ...o }) {
-	let { bands: c } = P(t);
+function H({ eq: t, open: n = !0, onClose: r, title: i = "Equalizer", ...a }) {
+	let { bands: s } = F(t);
 	return e(() => {
 		if (!n) return;
 		let e = (e) => e.key === "Escape" && r?.();
 		return window.addEventListener("keydown", e), () => window.removeEventListener("keydown", e);
-	}, [n, r]), !n || typeof document > "u" ? null : s(/* @__PURE__ */ a("div", {
+	}, [n, r]), !n || typeof document > "u" ? null : c(/* @__PURE__ */ o("div", {
 		className: "geq-overlay",
 		onMouseDown: (e) => e.target === e.currentTarget && r?.(),
-		children: /* @__PURE__ */ a("div", {
-			className: `geq-dialog${c.length > 7 ? " geq-wide" : ""}`,
+		children: /* @__PURE__ */ o("div", {
+			className: `geq-dialog${s.length > 7 ? " geq-wide" : ""}`,
 			role: "dialog",
 			"aria-modal": "true",
 			"aria-label": i || "Equalizer",
-			children: /* @__PURE__ */ a(B, {
+			children: /* @__PURE__ */ o(V, {
 				eq: t,
 				title: i,
 				onDone: r,
-				...o
+				...a
 			})
 		})
 	}), document.body);
 }
-export { S as BUILT_IN_PRESETS, B as Equalizer, V as EqualizerModal, f as HIGH_CUT, N as Knob, d as LOW_CUT, l as MAX_RANGE, y as MODES, b as MODE_LIST, c as RANGES, u as STEP, E as createEqualizer, M as fmtHz, P as useEqualizer };
+export { C as BUILT_IN_PRESETS, V as Equalizer, H as EqualizerModal, p as HIGH_CUT, P as Knob, f as LOW_CUT, u as MAX_RANGE, b as MODES, x as MODE_LIST, l as RANGES, d as STEP, D as createEqualizer, N as fmtHz, F as useEqualizer };
 
 //# sourceMappingURL=index.js.map

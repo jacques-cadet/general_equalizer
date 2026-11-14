@@ -269,6 +269,22 @@ describe("presets", () => {
     expect(eq.savePreset("   ")).toBe(null);
   });
 
+  it("updates a user preset in place (same id and name), only in its own mode", () => {
+    const { eq, storage } = make();
+    eq.applyValues([1, 1, 1]);
+    const p = eq.savePreset("Mine");
+    eq.applyValues([3, -2, 0.5]);
+    const fn = vi.fn(); eq.subscribe(fn);
+    expect(eq.updatePreset(p.id)).toMatchObject({ id: p.id, name: "Mine", mode: 3, values: [3, -2, 0.5] });
+    expect(eq.getState().userPresets).toEqual([{ ...p, values: [3, -2, 0.5] }]);
+    expect(JSON.parse(storage.getItem("geq:presets"))[0].values).toEqual([3, -2, 0.5]);
+    expect(fn).toHaveBeenCalled();
+    eq.setMode(7);
+    expect(eq.updatePreset(p.id)).toBe(null);   // a 3-band preset can't take 7 values
+    expect(eq.updatePreset("nope")).toBe(null);
+    expect(eq.updatePreset("b-flat")).toBe(null);   // built-ins are read-only
+  });
+
   it("keeps at most maxUserPresets", () => {
     const { eq } = make({ maxUserPresets: 2 });
     eq.savePreset("a"); eq.savePreset("b"); eq.savePreset("c");

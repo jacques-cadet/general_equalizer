@@ -6,7 +6,7 @@ A graphic equalizer for React apps that play audio in the browser. It runs on th
 - **Low cut / high cut knobs** (12 dB/oct high-pass from 20 Hz to 1 kHz, low-pass from 1 kHz to 20 kHz)
 - **Bypass**, which takes the EQ out of the sound and keeps your settings
 - **±6 / ±12 / ±18 dB range**, in 0.1 dB steps. Narrowing the range and widening it again brings the old settings back.
-- **Presets**: six built-ins, plus presets your users save themselves
+- **Presets**: six built-ins, plus presets your users save, update and delete themselves
 - **Saved settings** (localStorage by default, or your own storage)
 - Keyboard and screen-reader support, a layout that fits phones, and theming through CSS variables
 
@@ -95,7 +95,7 @@ The instance's methods:
 | `setGain(bandId, dB)`, `applyValues([dB...])`, `getValues()` | band ids come from `getState().bands` |
 | `setRange(6 \| 12 \| 18)`, `setBypass(bool)`, `setCut("low" \| "high", hz)` | |
 | `reset()` | flat bands + both cuts off |
-| `applyPreset(id)`, `savePreset(name)`, `deletePreset(id)` | |
+| `applyPreset(id)`, `savePreset(name)`, `updatePreset(id)`, `deletePreset(id)` | `updatePreset` saves the current values into an existing user preset |
 | `dispose()` | disconnect everything (closes the AudioContext if the EQ created it) |
 
 ### `<Equalizer eq />` and `<EqualizerModal eq open onClose />`
